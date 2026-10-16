@@ -11,11 +11,12 @@ mkdirSync(out, { recursive: true });
 const devices = [
   { name: 'iphone15', width: 852, height: 393, dpr: 3 },
   { name: 'iphoneSE', width: 667, height: 375, dpr: 2 },
+  { name: 'ipad', width: 1180, height: 820, dpr: 2, optional: true },
 ];
 const only = process.env.DEVICE;
 const errors = [];
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM ?? undefined });
-for (const d of devices.filter((x) => !only || x.name === only)) {
+for (const d of devices.filter((x) => (only ? x.name === only : !x.optional))) {
   const ctx = await browser.newContext({ viewport: { width: d.width, height: d.height }, deviceScaleFactor: d.dpr, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
   page.on('console', (m) => { if (m.type() === 'error') errors.push(`[${d.name}] console: ${m.text()}`); });

@@ -55,6 +55,8 @@ export class App implements AppActions {
   private dailyShown = false;
   private debug: DebugMenu | null = null;
   private runCount = 0;
+  /** Smoothed per-frame timings in ms (update = simulation, render = drawing). */
+  readonly perf = { update: 0, render: 0, worst: 0 };
 
   constructor() {
     this.services = new Services(createStorage());
@@ -204,10 +206,11 @@ export class App implements AppActions {
       this.fps = Math.round(this.fpsFrames / this.fpsTime);
       this.fpsFrames = 0;
       this.fpsTime = 0;
-      if (this.view) this.hud.setFps(this.fps, `· ${this.view.particles.count} fx`);
+      if (this.view) this.hud.setFps(this.fps, `· sim ${this.perf.update.toFixed(1)}ms · draw ${this.perf.render.toFixed(1)}ms · ${this.view.particles.count} fx`);
     }
 
     const v = this.view;
+    const t0 = performance.now();
     if (v) {
       if (!this.paused) {
         if (this.mode === 'game') {
@@ -222,7 +225,12 @@ export class App implements AppActions {
         v.coinTarget = [cx * this.dpr, cy * this.dpr];
         if (this.ui.current === 'hud') this.hud.render(v.hud);
       }
+      const t1 = performance.now();
       v.render(this.ctx);
+      const t2 = performance.now();
+      this.perf.update = this.perf.update * 0.95 + (t1 - t0) * 0.05;
+      this.perf.render = this.perf.render * 0.95 + (t2 - t1) * 0.05;
+      this.perf.worst = Math.max(this.perf.worst * 0.995, t2 - t0);
     } else {
       this.ctx.setTransform(1, 0, 0, 1, 0, 0);
       this.ctx.fillStyle = '#1b1f3b';
@@ -283,7 +291,7 @@ export class App implements AppActions {
   }
 
   open(screen: MenuScreenName): void {
-    if (this.mode !== 'menu') this.goMenu();
+    if (this.mode !== 'menu') this.goMenu(screen === 'menu');
     this.ui.show(screen);
   }
 
@@ -476,6 +484,6 @@ export class App implements AppActions {
 
   /** Exposed for automated tests. */
   get debugState() {
-    return { mode: this.mode, paused: this.paused, screen: this.ui.current, runs: this.runCount, fps: this.fps, view: this.view };
+    return { mode: this.mode, paused: this.paused, screen: this.ui.current, runs: this.runCount, fps: this.fps, view: this.view, perf: this.perf };
   }
 }
