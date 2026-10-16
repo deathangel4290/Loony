@@ -91,6 +91,7 @@ export class GameView {
 
   readonly hud: HudState = { distance: 0, best: 0, coins: 0, fuel: 1, score: 0, combo: 0, multiplier: 1, comboFrac: 0, wheelie: 0, health: 1, liveFlips: 0, lowFuel: false };
   private time = 0;
+  private lastSmashText = -1;
   private flash = 0;
   private pose: VehiclePose = { x: 0, y: 0, a: 0, rx: 0, ry: 0, ra: 0, fx: 0, fy: 0, fa: 0 };
   private rpm = 0;
@@ -183,14 +184,17 @@ export class GameView {
         backflip: '#7dd3ff', frontflip: '#b388ff', perfect: '#7dff9a', bigair: '#ffd84d', hugeair: '#ffb347',
         longjump: '#ffd84d', closecall: '#ff8fa3', wheelie: '#7dffe0', multi: '#ffffff',
       };
+      // Screen-anchored trick feed: one line per award under the combo meter,
+      // horizontally following the car so it reads as "your" trick.
+      const [carSx] = this.worldToScreen(e.x, e.y);
+      const fx = Math.max(0.3, Math.min(0.7, carSx / this.W));
       let i = 0;
       for (const a of e.awards) {
-        const label = a.points > 0 ? `${a.label}` : a.label;
         const sub = a.points > 0 ? `+${formatNumber(a.points * e.multiplier)}` : '';
-        this.texts.spawn(label, e.x, e.y + 2.2 + i * 0.05, colors[a.kind] ?? '#fff', a.kind === 'multi' ? 0.75 : 1, sub, i * 0.28, 1.5);
+        this.texts.spawn(a.label, fx, 0.27 + i * 0.105, colors[a.kind] ?? '#fff', a.kind === 'multi' ? 0.8 : 1.15, sub, i * 0.2, 1.7, true);
         i++;
       }
-      if (e.multiplier > 1) this.texts.spawn(`COMBO x${e.multiplier}`, e.x, e.y + 3.6, '#ffd84d', 0.8, '', i * 0.28, 1.3);
+      if (e.multiplier > 1) this.texts.spawn(`COMBO x${e.multiplier}`, fx, 0.27 + i * 0.105, '#ffd84d', 0.9, '', i * 0.2, 1.5, true);
       this.particles.emit({ kind: PK.Confetti, x: e.x, y: e.y + 1, color: '#ffd84d', count: 10, speed: 5, life: 1.0, size: 0.16, gravity: 6, spin: 8 });
       this.particles.emit({ kind: PK.Confetti, x: e.x, y: e.y + 1, color: '#7dd3ff', count: 8, speed: 5, life: 1.0, size: 0.16, gravity: 6, spin: 8 });
       if (demo) return;
@@ -252,7 +256,10 @@ export class GameView {
       audio.play('propHit');
       this.camera.addTrauma(0.1);
       hap.light();
-      this.texts.spawn('SMASH!', x, y + 1.3, '#ffb347', 0.75, '', 0, 0.9);
+      if (this.time - this.lastSmashText > 0.7) {
+        this.lastSmashText = this.time;
+        this.texts.spawn('SMASH!', x, y + 0.9, '#ffb347', 0.7, '', 0, 0.8);
+      }
     });
     ev.on('crash', ({ reason, x, y }) => {
       if (reason === 'fuel') {
@@ -533,7 +540,7 @@ export class GameView {
     if (!this.reducedEffects && this.quality !== 'low') this.renderSpeedLines(ctx);
     this.weather.render(ctx, W, H, this.time);
     this.renderFlyers(ctx);
-    this.texts.render(ctx, (x, y) => this.worldToScreen(x, y), Math.min(H * 0.07, W * 0.045));
+    this.texts.render(ctx, (x, y) => this.worldToScreen(x, y), Math.min(H * 0.07, W * 0.045), W, H);
     if (this.hud.lowFuel && !this.reducedEffects && !this.opts.demo) {
       const a = 0.18 + Math.sin(this.time * 6) * 0.1;
       const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.9);
