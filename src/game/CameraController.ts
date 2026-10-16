@@ -58,7 +58,8 @@ export class CameraController {
     this.lookY = damp(this.lookY, targetLookY, 2.0, dt);
 
     let wantH = cfg.baseViewHeight + t.speedFrac * 2.4;
-    if (t.airborne) wantH += clamp(t.heightAboveGround * 0.55, 0, cfg.maxViewHeight - cfg.baseViewHeight);
+    // In the air, frame both the car and the ground it will land on.
+    if (t.airborne) wantH = Math.max(wantH, (t.heightAboveGround + 3.5) * 1.3);
     wantH = clamp(wantH, cfg.baseViewHeight, cfg.maxViewHeight);
     // Keep at least ~20m of road visible on squarer screens (iPad).
     wantH = Math.max(wantH, 21 / this.aspect);
@@ -66,7 +67,7 @@ export class CameraController {
     this.punch = damp(this.punch, 0, 5, dt);
 
     const tx = t.x + this.lookX;
-    const ty = t.y + 1.0 + this.lookY + (t.airborne ? -t.heightAboveGround * 0.18 : 0);
+    const ty = t.y + 1.0 + this.lookY + (t.airborne ? -t.heightAboveGround * 0.42 : 0);
     this.x = damp(this.x, tx, cfg.followRate, dt);
     this.y = damp(this.y, ty, cfg.followRate * 0.8, dt);
 

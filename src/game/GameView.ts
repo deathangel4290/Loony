@@ -346,7 +346,7 @@ export class GameView {
     const vel = v.chassis.getLinearVelocity();
     const speed = vel.length();
     this.speedFrac = damp(this.speedFrac, clamp01(speed / this.opts.tuning.topSpeed), 4, dt);
-    const ground = s.gen.surfaceAt(this.pose.x);
+    const ground = Math.min(s.gen.surfaceAt(this.pose.x), s.gen.surfaceAt(this.pose.x + vel.x * 0.5));
     this.camera.aspect = this.W / this.H;
     this.camera.update(dt * (s.state === 'ending' ? 0.6 : 1), {
       x: this.pose.x, y: this.pose.y, vx: vel.x, vy: vel.y, airborne: v.airborne,

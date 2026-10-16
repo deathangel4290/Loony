@@ -53,7 +53,7 @@ export const CONFIG = {
   },
   camera: {
     baseViewHeight: 11.5,
-    maxViewHeight: 17.5,
+    maxViewHeight: 24,
     lookAhead: 0.42,
     followRate: 7,
     zoomRate: 1.6,

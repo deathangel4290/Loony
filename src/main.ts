@@ -2,7 +2,10 @@ import '@fontsource/fredoka/latin-400.css';
 import '@fontsource/fredoka/latin-600.css';
 import '@fontsource/lilita-one/latin-400.css';
 import './styles/main.css';
+import { installPolyfills } from './core/polyfills';
 import { App } from './App';
+
+installPolyfills();
 
 const app = new App();
 (window as unknown as { __app: App }).__app = app;
