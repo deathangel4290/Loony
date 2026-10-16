@@ -125,6 +125,7 @@ Debug tools are available in `npm run dev` and `npm run build:debug` builds, thr
 
 - `npm test`: save corruption and backup fallback, field sanitizing, economy, missions, daily-reward date logic, level-ups, and headless physics regressions (every vehicle in every world; a novice holding gas survives the tutorial; the starter car runs out of fuel before it crashes).
 - `npm run build:debug && npx vite preview` and then `node e2e/smoke.mjs` boots the game in mobile Chromium at iPhone 15 and iPhone SE sizes, plays the first run with real input, walks through every screen, fails on any console or page error, and writes screenshots to `e2e/out/`.
+- `node e2e/qa.mjs`: lifecycle QA — backgrounding pauses, save survives reload, out-of-fuel ending, upgrade/vehicle purchases through the real UI, settings persistence, retry.
 - `node e2e/gallery.mjs`: one screenshot per world/vehicle pair.
 - `node e2e/perf.mjs city vortex high 4`: frame timings with the CPU throttled 4×.
 
