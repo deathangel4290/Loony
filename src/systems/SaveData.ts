@@ -61,6 +61,7 @@ export interface SaveData {
   daily: { lastClaimDate: string | null; dayIndex: number; cycles: number };
   settings: Settings;
   tutorial: { completed: boolean; garageIntroDone: boolean };
+  challenge: { dateKey: string; best: number; completed: boolean; attempts: number; streak: number };
 }
 
 export const defaultSettings = (): Settings => ({
@@ -106,6 +107,7 @@ export const createDefaultSave = (): SaveData => ({
   daily: { lastClaimDate: null, dayIndex: 0, cycles: 0 },
   settings: defaultSettings(),
   tutorial: { completed: false, garageIntroDone: false },
+  challenge: { dateKey: '', best: 0, completed: false, attempts: 0, streak: 0 },
 });
 
 // ---------------------------------------------------------------------------
@@ -239,6 +241,15 @@ export const sanitizeSave = (raw: unknown): SaveData => {
   if (isObj(raw.tutorial)) {
     d.tutorial.completed = bool(raw.tutorial.completed, false);
     d.tutorial.garageIntroDone = bool(raw.tutorial.garageIntroDone, false);
+  }
+
+  if (isObj(raw.challenge)) {
+    const c = raw.challenge;
+    d.challenge.dateKey = typeof c.dateKey === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(c.dateKey) ? c.dateKey : '';
+    d.challenge.best = Math.floor(num(c.best, 0));
+    d.challenge.completed = bool(c.completed, false);
+    d.challenge.attempts = Math.floor(num(c.attempts, 0));
+    d.challenge.streak = Math.floor(num(c.streak, 0));
   }
 
   return d;

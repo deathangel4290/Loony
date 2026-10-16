@@ -5,6 +5,7 @@ import { AchievementManager } from './AchievementManager';
 import { AudioManager } from './AudioManager';
 import { CurrencyManager } from './CurrencyManager';
 import { DailyRewardManager } from './DailyRewardManager';
+import { ChallengeManager, type ChallengeResult } from './ChallengeManager';
 import type { GameEvents } from './events';
 import { GarageManager } from './GarageManager';
 import { HapticsManager } from './HapticsManager';
@@ -27,6 +28,7 @@ export interface RunRewards {
   levelsGained: number[];
   missionsCompleted: MissionState[];
   achievements: AchievementDef[];
+  challenge: ChallengeResult | null;
 }
 
 /** Composition root for all persistent/meta systems. */
@@ -42,6 +44,7 @@ export class Services {
   readonly missions: MissionManager;
   readonly achievements: AchievementManager;
   readonly daily: DailyRewardManager;
+  readonly challenge: ChallengeManager;
   readonly audio = new AudioManager();
   readonly haptics = new HapticsManager();
 
@@ -57,6 +60,7 @@ export class Services {
     this.missions = new MissionManager(this.save, this.events, grant);
     this.achievements = new AchievementManager(this.save, this.events, grant);
     this.daily = new DailyRewardManager(this.save, grant);
+    this.challenge = new ChallengeManager(this.save, grant);
 
     this.events.on('settings', (s) => {
       this.audio.setVolumes(s.musicVolume, s.sfxVolume);
@@ -84,10 +88,14 @@ export class Services {
   /** Applies a finished run to every progression system, then saves. */
   finishRun(summary: RunSummary): RunRewards {
     const d = this.save.data;
-    const previousBest = d.bestDistance[summary.worldId] ?? 0;
+    // Challenge runs use a loaner car on a fixed course, so they keep their own
+    // best and don't touch the per-world records.
+    const isChallenge = summary.mode === 'challenge';
+    const previousBest = isChallenge ? this.challenge.best : d.bestDistance[summary.worldId] ?? 0;
     const newBest = summary.distance > previousBest && summary.distance >= 1;
-    if (newBest) d.bestDistance[summary.worldId] = Math.floor(summary.distance);
-    d.bestScore[summary.worldId] = Math.max(d.bestScore[summary.worldId] ?? 0, summary.score);
+    if (newBest && !isChallenge) d.bestDistance[summary.worldId] = Math.floor(summary.distance);
+    if (!isChallenge) d.bestScore[summary.worldId] = Math.max(d.bestScore[summary.worldId] ?? 0, summary.score);
+    const challenge = isChallenge ? this.challenge.recordRun(summary) : null;
     if (!d.visitedWorlds.includes(summary.worldId)) d.visitedWorlds.push(summary.worldId);
 
     const s = d.stats;
@@ -116,6 +124,6 @@ export class Services {
     const xpAfter = this.progression.snapshot();
     this.save.markDirty();
     void this.save.flush();
-    return { summary, previousBest, newBest, xpBefore, xpAfter, levelsGained, missionsCompleted, achievements };
+    return { summary, previousBest, newBest, xpBefore, xpAfter, levelsGained, missionsCompleted, achievements, challenge };
   }
 }

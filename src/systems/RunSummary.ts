@@ -1,7 +1,10 @@
 export type EndReason = 'crash' | 'fuel' | 'lava' | 'damage' | 'flipped' | 'quit';
 
 /** Everything a finished run reports to the progression systems. */
+export type RunMode = 'normal' | 'challenge';
+
 export interface RunSummary {
+  mode: RunMode;
   worldId: string;
   vehicleId: string;
   seed: number;

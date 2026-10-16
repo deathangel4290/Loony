@@ -84,6 +84,21 @@ export class ResultsScreen implements Screen {
       }, 900);
     }
 
+    if (r.challenge) {
+      const ch = r.challenge;
+      const pct = Math.min(100, (ch.best / ch.challenge.target) * 100);
+      const box = h('div', 'panel res-box challenge', `<h4><span>${icon('flag')} Daily challenge</span><span>${fmt(ch.best)} / ${fmt(ch.challenge.target)} m</span></h4><div class="bar"><i style="width:0%"></i></div>`);
+      if (ch.completedNow) box.append(h('div', 'res-mission', `${icon('check')} Goal reached! ${rewardText(ch.challenge.reward)}`));
+      else if (ch.completed) box.append(h('div', 'res-mission', `${icon('check')} Completed today`));
+      else box.append(h('div', 'card-sub', `${fmt(ch.challenge.target - ch.best)} m to go — try again!`));
+      side.prepend(box);
+      setTimeout(() => {
+        const i = box.querySelector<HTMLElement>('.bar > i');
+        if (i) i.style.width = `${pct}%`;
+      }, 700);
+      if (ch.completedNow) setTimeout(() => s.audio.play('achievement'), 900);
+    }
+
     if (r.missionsCompleted.length || r.achievements.length) {
       const box = h('div', 'panel res-box');
       box.append(h('h4', '', `<span>${icon('target')} Completed</span>`));

@@ -11,6 +11,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: pages
@@ -41,5 +42,20 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # If Pages is still set to "Deploy from a branch", GitHub also publishes
+      # the raw source on every push. Wait for that to finish so the compiled
+      # game is always the last (live) deployment. No-op once the source is
+      # set to "GitHub Actions".
+      - name: Wait for legacy branch-based Pages build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 45); do
+            n=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=${{ github.sha }}" \
+              --jq '[.workflow_runs[] | select(.path == "dynamic/pages/pages-build-deployment" and .status != "completed")] | length' || echo 0)
+            if [ "$n" = "0" ]; then break; fi
+            echo "Legacy Pages build still running ($n); waiting..."
+            sleep 10
+          done
       - id: deployment
         uses: actions/deploy-pages@v4

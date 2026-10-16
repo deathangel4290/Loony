@@ -1,11 +1,13 @@
 import type { Services } from '../systems/Services';
+import type { RunMode } from '../systems/RunSummary';
 import type { UIManager } from './UIManager';
 
 export type MenuScreenName = 'menu' | 'garage' | 'vehicles' | 'worlds' | 'missions' | 'achievements' | 'settings';
 
 /** Actions screens can ask the app to perform. */
 export interface AppActions {
-  startRun(): void;
+  startRun(mode?: RunMode): void;
+  openChallenge(): void;
   goMenu(): void;
   open(screen: MenuScreenName): void;
   resume(): void;

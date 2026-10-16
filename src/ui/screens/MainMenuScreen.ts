@@ -13,6 +13,7 @@ export class MainMenuScreen implements Screen {
   private selWorld: HTMLElement;
   private missionsBadge: HTMLElement;
   private dailyBadge: HTMLElement;
+  private challengeBadge = h('span', 'badge', 'NEW');
 
   constructor(private c: UIContext) {
     const s = c.services;
@@ -40,7 +41,8 @@ export class MainMenuScreen implements Screen {
     center.append(playRow, sel);
 
     const nav = h('div', 'menu-nav');
-    const items: [MenuScreenName | 'daily', string, string, string][] = [
+    const items: [MenuScreenName | 'daily' | 'challenge', string, string, string][] = [
+      ['challenge', 'Challenge', 'flag', 'c4'],
       ['garage', 'Garage', 'wrench', 'c1'],
       ['vehicles', 'Vehicles', 'car', 'c2'],
       ['worlds', 'Worlds', 'globe', 'c3'],
@@ -53,8 +55,9 @@ export class MainMenuScreen implements Screen {
     this.dailyBadge = h('span', 'badge', '!');
     for (const [id, label, ic, cls] of items) {
       const b = h('button', `nav-btn ${cls}`, `${icon(ic)}<span>${label}</span>`);
-      b.addEventListener('click', () => (id === 'daily' ? c.app.openDaily() : c.app.open(id)));
+      b.addEventListener('click', () => (id === 'daily' ? c.app.openDaily() : id === 'challenge' ? c.app.openChallenge() : c.app.open(id)));
       if (id === 'missions') b.append(this.missionsBadge);
+      if (id === 'challenge') b.append(this.challengeBadge);
       if (id === 'daily') b.append(this.dailyBadge);
       nav.append(b);
     }
@@ -79,6 +82,7 @@ export class MainMenuScreen implements Screen {
     this.missionsBadge.textContent = String(m);
     this.missionsBadge.style.display = m > 0 ? '' : 'none';
     this.dailyBadge.style.display = s.daily.canClaim() ? '' : 'none';
+    this.challengeBadge.style.display = s.challenge.attempts === 0 ? '' : 'none';
     this.currency.refresh(false);
     void qs;
   }

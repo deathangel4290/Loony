@@ -9,6 +9,7 @@ import { VEHICLES } from '../src/data/vehicles';
 import type { RunSummary } from '../src/systems/RunSummary';
 
 const run = (over: Partial<RunSummary> = {}): RunSummary => ({
+  mode: 'normal',
   worldId: 'hills', vehicleId: 'pip', seed: 1, distance: 800, score: 5000, coinsCollected: 300, trickCoins: 40,
   distanceCoins: 48, coinsEarned: 388, trickPoints: 400, xpEarned: 120, flips: 2, backflips: 2, frontflips: 0,
   perfectLandings: 1, tricks: 3, longestWheelie: 1.5, longestAirtime: 2.1, maxAltitude: 22, bestCombo: 2,
@@ -187,5 +188,38 @@ describe('Economy', () => {
       expect(maxed.fuelCapacity / base.fuelCapacity).toBeGreaterThan(2);
     }
     expect(createDefaultSave().ownedVehicles).toEqual(['pip']);
+  });
+});
+
+describe('Daily challenge', () => {
+  it('is deterministic per date and varies across dates', async () => {
+    const { dailyChallenge } = await import('../src/data/challenge');
+    expect(dailyChallenge('2026-10-16')).toEqual(dailyChallenge('2026-10-16'));
+    const set = new Set(Array.from({ length: 10 }, (_, i) => JSON.stringify(dailyChallenge(`2026-11-${String(i + 1).padStart(2, '0')}`))));
+    expect(set.size).toBe(10);
+  });
+
+  it('pays once per day, keeps its own best and resets the next day', async () => {
+    const { ChallengeManager } = await import('../src/systems/ChallengeManager');
+    const s = new Services(new MemoryStorage());
+    await s.save.load();
+    let now = new Date(2026, 9, 16, 10);
+    const cm = new ChallengeManager(s.save, (r) => s.grant(r), () => now);
+    (s as unknown as { challenge: unknown }).challenge = cm;
+    const target = cm.today.target;
+    const r1 = s.finishRun(run({ mode: 'challenge', distance: target - 100 }));
+    expect(r1.challenge?.completedNow).toBe(false);
+    const coins = s.currency.coins;
+    const r2 = s.finishRun(run({ mode: 'challenge', distance: target + 10 }));
+    expect(r2.challenge?.completedNow).toBe(true);
+    expect(s.currency.gems).toBeGreaterThanOrEqual(5);
+    expect(s.currency.coins).toBeGreaterThan(coins);
+    const r3 = s.finishRun(run({ mode: 'challenge', distance: target + 50 }));
+    expect(r3.challenge?.completedNow).toBe(false);
+    expect(cm.best).toBe(target + 50);
+    expect(s.save.data.bestDistance.hills ?? 0).toBe(0);
+    now = new Date(2026, 9, 17, 10);
+    expect(cm.best).toBe(0);
+    expect(cm.completed).toBe(false);
   });
 });

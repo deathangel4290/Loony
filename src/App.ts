@@ -4,7 +4,11 @@ import { randomSeed } from './core/Random';
 import { MENU_MUSIC } from './data/worlds';
 import { GameView } from './game/GameView';
 import { InputManager } from './systems/InputManager';
-import type { RunSummary } from './systems/RunSummary';
+import type { RunMode, RunSummary } from './systems/RunSummary';
+import { getVehicle } from './data/vehicles';
+import { getWorld } from './data/worlds';
+import { applyUpgrades } from './data/upgrades';
+import { DEFAULT_LOADOUT } from './data/cosmetics';
 import { Services } from './systems/Services';
 import { createStorage } from './systems/Storage';
 import { h } from './ui/dom';
@@ -23,7 +27,9 @@ import { VehiclesScreen } from './ui/screens/VehiclesScreen';
 import { WorldsScreen } from './ui/screens/WorldsScreen';
 import type { AppActions, MenuScreenName, UIContext } from './ui/types';
 import { UIManager } from './ui/UIManager';
-import { rewardText } from './ui/widgets';
+import { rewardChips, rewardText } from './ui/widgets';
+import { fmt } from './ui/dom';
+import { renderVehicleThumb, renderWorldThumb } from './ui/previews';
 import type { DebugMenu } from './debug/DebugMenu';
 
 type Mode = 'boot' | 'title' | 'menu' | 'game';
@@ -55,6 +61,7 @@ export class App implements AppActions {
   private dailyShown = false;
   private debug: DebugMenu | null = null;
   private runCount = 0;
+  private runMode: RunMode = 'normal';
   /** Smoothed per-frame timings in ms (update = simulation, render = drawing). */
   readonly perf = { update: 0, render: 0, worst: 0 };
 
@@ -295,18 +302,34 @@ export class App implements AppActions {
     this.ui.show(screen);
   }
 
-  startRun(): void {
+  startRun(mode: RunMode = 'normal'): void {
     const s = this.services;
     s.audio.unlock();
+    this.runMode = mode;
     void this.ui.transition(() => {
       this.paused = false;
       this.destroyView();
-      const vehicle = s.garage.selected;
-      const tutorial = !s.save.data.tutorial.completed;
-      const world = tutorial ? s.worlds.selected : s.worlds.selected;
+      const tutorial = mode === 'normal' && !s.save.data.tutorial.completed;
+      let vehicle = s.garage.selected;
+      let world = s.worlds.selected;
+      let tuning = s.upgrades.tuning(vehicle.id);
+      let look = resolveLook(vehicle, s.garage.loadout(vehicle.id));
+      let seed = randomSeed();
+      let best = s.worlds.best(world.id);
+      let goal = 0;
+      if (mode === 'challenge') {
+        const c = s.challenge.today;
+        vehicle = getVehicle(c.vehicleId);
+        world = getWorld(c.worldId);
+        const lv = c.upgradeLevel;
+        tuning = applyUpgrades(vehicle.physics, { engine: lv, tires: lv, suspension: lv, fuel: lv, air: lv, brakes: lv });
+        look = resolveLook(vehicle, DEFAULT_LOADOUT);
+        seed = c.seed;
+        best = s.challenge.best;
+        goal = c.target;
+      }
       this.view = new GameView({
-        services: s, world, vehicle, tuning: s.upgrades.tuning(vehicle.id), look: resolveLook(vehicle, s.garage.loadout(vehicle.id)),
-        seed: randomSeed(), tutorial, demo: false, ctx: this.ctx, bestDistance: s.worlds.best(world.id),
+        services: s, world, vehicle, tuning, look, seed, tutorial, demo: false, ctx: this.ctx, bestDistance: best, goal, mode,
       });
       this.view.resize(this.W, this.H, this.dpr);
       this.view.onPrompt = (p) => this.hud.setPrompt(p);
@@ -425,7 +448,7 @@ export class App implements AppActions {
 
   restart(): void {
     this.closePause();
-    this.startRun();
+    this.startRun(this.runMode);
   }
 
   quitRun(to: 'menu' | 'garage'): void {
@@ -437,6 +460,41 @@ export class App implements AppActions {
         const firstTime = !this.services.save.data.tutorial.garageIntroDone;
         this.ui.show('garage', firstTime ? { highlight: 'engine' } : undefined);
       }
+    });
+  }
+
+  openChallenge(): void {
+    const s = this.services;
+    const c = s.challenge.today;
+    const v = getVehicle(c.vehicleId);
+    const w = getWorld(c.worldId);
+    const done = s.challenge.completed;
+    const card = h('div', 'modal-card challenge-card');
+    card.innerHTML = `<h2>DAILY CHALLENGE</h2>
+      <p>Everyone gets the same course today. Reach the goal for a bonus!</p>
+      <div class="challenge-art"><canvas class="cw"></canvas><canvas class="cv"></canvas></div>
+      <div class="challenge-info">
+        <div><small>WORLD</small><b>${w.name}</b></div>
+        <div><small>RIDE</small><b>${v.name} · Lv ${c.upgradeLevel}</b></div>
+        <div><small>GOAL</small><b>${fmt(c.target)} m</b></div>
+        <div><small>TODAY'S BEST</small><b>${s.challenge.best > 0 ? fmt(s.challenge.best) + ' m' : '—'}</b></div>
+      </div>
+      <div class="mreward">${done ? `<span class="reward-chip xp">${icon('check')} Completed today</span>` : rewardChips(c.reward)}</div>`;
+    const actions = h('div', 'modal-actions');
+    const close = h('button', 'btn dark', 'CLOSE');
+    close.dataset.close = '1';
+    close.dataset.sfx = 'back';
+    const play = h('button', 'btn big pink', `${icon('play')} ${s.challenge.attempts > 0 ? 'TRY AGAIN' : 'GO!'}`);
+    actions.append(close, play);
+    card.append(actions);
+    const closer = this.ui.modal(card, { dismissible: true });
+    play.addEventListener('click', () => {
+      closer();
+      this.startRun('challenge');
+    });
+    requestAnimationFrame(() => {
+      renderWorldThumb(card.querySelector<HTMLCanvasElement>('.cw')!, w);
+      renderVehicleThumb(card.querySelector<HTMLCanvasElement>('.cv')!, v, resolveLook(v, DEFAULT_LOADOUT));
     });
   }
 

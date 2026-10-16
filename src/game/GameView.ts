@@ -13,7 +13,7 @@ import { TerrainRenderer } from '../render/TerrainRenderer';
 import { VehicleRenderer, type VehicleLook, type VehiclePose } from '../render/VehicleRenderer';
 import { Weather } from '../render/Weather';
 import type { Services } from '../systems/Services';
-import { endReasonText, type RunSummary } from '../systems/RunSummary';
+import { endReasonText, type RunMode, type RunSummary } from '../systems/RunSummary';
 import { autopilot } from './Autopilot';
 import { CameraController } from './CameraController';
 import { GameSession } from './GameSession';
@@ -32,6 +32,9 @@ export interface GameViewOptions {
   demo: boolean;
   ctx: CanvasRenderingContext2D;
   bestDistance: number;
+  /** Daily challenge target distance (0 = none). */
+  goal?: number;
+  mode?: RunMode;
 }
 
 export interface HudState {
@@ -47,6 +50,7 @@ export interface HudState {
   health: number;
   liveFlips: number;
   lowFuel: boolean;
+  goal: number;
 }
 
 interface Flyer {
@@ -89,7 +93,7 @@ export class GameView {
   /** Screen position (device px) where collected coins fly to. */
   coinTarget: [number, number] = [0, 0];
 
-  readonly hud: HudState = { distance: 0, best: 0, coins: 0, fuel: 1, score: 0, combo: 0, multiplier: 1, comboFrac: 0, wheelie: 0, health: 1, liveFlips: 0, lowFuel: false };
+  readonly hud: HudState = { distance: 0, best: 0, coins: 0, fuel: 1, score: 0, combo: 0, multiplier: 1, comboFrac: 0, wheelie: 0, health: 1, liveFlips: 0, lowFuel: false, goal: 0 };
   private time = 0;
   private lastSmashText = -1;
   private flash = 0;
@@ -112,7 +116,7 @@ export class GameView {
     const settings = s.settings.values;
     this.reducedEffects = settings.reducedEffects;
     this.quality = settings.quality;
-    this.session = new GameSession({ world: opts.world, vehicle: opts.vehicle, tuning: opts.tuning, seed: opts.seed, tutorial: opts.tutorial });
+    this.session = new GameSession({ world: opts.world, vehicle: opts.vehicle, tuning: opts.tuning, seed: opts.seed, tutorial: opts.tutorial, mode: opts.mode });
     if (opts.demo) this.session.player.godMode = true;
     this.particles = new ParticleSystem(600);
     this.particles.budget = s.settings.particleBudget();
@@ -129,6 +133,7 @@ export class GameView {
     this.coinSprites = buildCoinSprites(90);
     this.fuelSprite = buildFuelSprite(90);
     this.hud.best = opts.bestDistance;
+    this.hud.goal = opts.goal ?? 0;
     this.updatePose(1);
     this.camera.snap({ x: this.pose.x, y: this.pose.y, vx: 0, vy: 0, airborne: false, heightAboveGround: 0, speedFrac: 0 });
 
@@ -615,6 +620,29 @@ export class GameView {
       ctx.textBaseline = 'middle';
       ctx.fillText(`${x}m`, 0, 0.02);
       ctx.restore();
+    }
+    // daily challenge goal line
+    const goal = this.hud.goal;
+    if (goal > 0 && goal > minX - 4 && goal < maxX + 4) {
+      const y = gen.surfaceAt(goal);
+      ctx.fillStyle = '#2b2a38';
+      ctx.fillRect(goal - 3.2, y, 0.18, 4.6);
+      ctx.fillRect(goal + 3.0, y, 0.18, 4.6);
+      ctx.fillStyle = '#9b5de5';
+      ctx.fillRect(goal - 3.4, y + 3.7, 6.8, 0.95);
+      ctx.save();
+      ctx.translate(goal, y + 4.17);
+      ctx.scale(1, -1);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '0.62px Lilita One, Fredoka, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('CHALLENGE GOAL', 0, 0.04);
+      ctx.restore();
+      for (let k = 0; k < 10; k++) {
+        ctx.fillStyle = k % 2 ? '#ffffff' : '#1c1b2e';
+        ctx.fillRect(goal - 0.05, y + k * 0.36, 0.1, 0.36);
+      }
     }
     // best distance flag
     const best = this.hud.best;

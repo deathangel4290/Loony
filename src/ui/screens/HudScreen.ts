@@ -97,8 +97,10 @@ export class HudScreen implements Screen {
     this.set('d', d, () => (this.dist.innerHTML = `${fmt(d)}<small> m</small>`));
     const best = Math.floor(s.best);
     const beat = best > 0 && d > best;
-    this.set('b', beat ? -1 : best, () => {
-      this.best.textContent = beat ? 'NEW BEST!' : best > 0 ? `BEST ${fmt(best)} m` : '';
+    const goalLeft = s.goal > 0 ? Math.max(0, Math.ceil(s.goal - s.distance)) : -1;
+    this.set('b', `${beat ? -1 : best}:${goalLeft}`, () => {
+      if (s.goal > 0) this.best.textContent = goalLeft > 0 ? `GOAL ${fmt(s.goal)} m · ${fmt(goalLeft)} to go` : 'GOAL REACHED!';
+      else this.best.textContent = beat ? 'NEW BEST!' : best > 0 ? `BEST ${fmt(best)} m` : '';
     });
     this.set('s', s.score, () => (this.score.textContent = `${fmt(s.score)} pts`));
     const f = Math.round(s.fuel * 200) / 2;

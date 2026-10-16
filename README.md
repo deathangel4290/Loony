@@ -10,6 +10,7 @@ Everything is original: the vehicles, terrain, sprites, music and sound are all 
 - **Forgiving by design.** A pedal held from the ground through a jump levels the car for landing; a fresh press in the air spins it (gas = forward, brake = backward). There's also anti-flip assist on big wheelies, and props can never trap the car.
 - **Seeded procedural terrain** built from hand-designed pieces (hills, kickers, gaps, bridges, lava pits, rooftops, ice). Every non-ramp segment is slope-checked, so there's always a way forward. Difficulty ramps with distance.
 - **Tricks and combos**: flips (double, triple…), big air, long jumps, perfect landings, close calls and wheelies, with a combo multiplier.
+- **Daily Challenge**: one seeded course per day, the same for every attempt. It has a rotating world, a loaner car, a distance goal and a once-a-day reward.
 - **Progression**: coins, gems, upgrade tokens, XP and levels, 6 upgrade stats × 10 levels per vehicle, 41 cosmetics, rotating missions, 24 trophies and a 7-day daily reward.
 - **Game feel**: interpolated 120 Hz physics, look-ahead camera that frames your landing, trauma-based shake, slow-motion crashes, particles, floating trick text, coins that fly to the HUD, a driver whose head bobs with the car, and haptics.
 - **Audio** made entirely with WebAudio: a layered engine whose pitch follows RPM, tire, skid and wind layers, about 25 synthesized sound effects, and a generative soundtrack per world.
@@ -28,6 +29,13 @@ Everything is original: the vehicles, terrain, sprites, music and sound are all 
 | Tests | Vitest (unit + headless physics), Playwright (smoke and visual) |
 
 Why this stack: it works on iOS through Capacitor and on the web unchanged. Android is one command away (`npx cap add android`). The game logic also runs headlessly, so physics and balance are tested by simulation.
+
+## Play in the browser (GitHub Pages)
+
+Every push to the default branch runs `.github/workflows/pages.yml`, which typechecks, runs the tests, builds the release game and publishes it to **https://deathangel4290.github.io/Loony/**.
+
+- In **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**. Until then, GitHub also publishes the raw source on every push. The workflow waits for that build and deploys afterwards, so the game still wins.
+- On iPhone, open the page in Safari and choose **Share → Add to Home Screen** to play full-screen. A service worker caches the game, so it also works offline after the first load.
 
 ## Getting started
 

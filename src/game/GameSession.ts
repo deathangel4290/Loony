@@ -2,7 +2,7 @@ import { Vec2, World } from 'planck';
 import { EventBus } from '../core/EventBus';
 import { CONFIG } from '../data/config';
 import type { PropKind, VehicleDef, VehiclePhysicsDef, WorldDef } from '../data/types';
-import type { EndReason, RunSummary } from '../systems/RunSummary';
+import type { EndReason, RunMode, RunSummary } from '../systems/RunSummary';
 import { PlayerController } from './PlayerController';
 import { TerrainGenerator, type Collectible } from './TerrainGenerator';
 import { PROP_DEFS, TerrainManager, type PropState } from './TerrainManager';
@@ -32,6 +32,7 @@ export interface SessionOptions {
   tuning: VehiclePhysicsDef;
   seed: number;
   tutorial?: boolean;
+  mode?: RunMode;
 }
 
 export type SessionState = 'running' | 'ending' | 'ended';
@@ -299,6 +300,7 @@ export class GameSession {
     const distanceCoins = Math.floor((dist / 100) * CONFIG.scoring.distanceCoinsPer100m * this.opts.world.coinMultiplier);
     const xp = Math.round((dist / 100) * CONFIG.scoring.xpPer100m + t.points * CONFIG.tricks.xpPerPoint + this.coinCount * 0.5);
     const s: RunSummary = {
+      mode: this.opts.mode ?? 'normal',
       worldId: this.opts.world.id,
       vehicleId: this.opts.vehicle.id,
       seed: this.opts.seed,
