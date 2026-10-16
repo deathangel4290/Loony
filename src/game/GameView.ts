@@ -242,8 +242,8 @@ export class GameView {
       if (!demo) audio.play('scrape', v.speed / 10);
     });
     ev.on('propHit', ({ kind, x, y, strength }) => {
-      const cols = PROP_DEBRIS[kind];
-      this.particles.emit({ kind: PK.Debris, x, y, color: cols[0], count: 4, speed: 3 + strength * 0.2, life: 0.8, size: 0.12, gravity: 14, spin: 10 });
+      this.particles.emit({ kind: PK.Dust, x, y: y - 0.3, color: this.dustColor(), count: 3, speed: 1.5, life: 0.6, size: 0.35, growth: 0.6, drag: 3, alpha: 0.6 });
+      if (kind !== 'tire') this.particles.emit({ kind: PK.Debris, x, y, color: PROP_DEBRIS[kind][1], count: 2, speed: 3 + strength * 0.2, life: 0.7, size: 0.1, gravity: 14, spin: 10 });
       if (demo) return;
       audio.play('propHit');
       hap.light();

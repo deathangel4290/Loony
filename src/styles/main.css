@@ -1100,9 +1100,9 @@ input[type='range']::-moz-range-thumb { width: 26px; height: 26px; border: 0; bo
 .tutorial-banner {
   position: absolute;
   left: 50%;
-  top: 30%;
-  transform: translate(-50%, -10px);
-  max-width: min(560px, 60vw);
+  bottom: max(18px, var(--sab));
+  transform: translate(-50%, 10px);
+  max-width: min(560px, 50vw);
   padding: 12px 22px;
   border-radius: 18px;
   background: rgba(15, 17, 45, 0.82);

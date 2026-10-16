@@ -27,6 +27,8 @@ export class TerrainRenderer {
   private pattern: CanvasPattern | null = null;
   private readonly chunkSamples: number;
   private readonly surf: WorldDef['terrain']['surface'];
+  private depthTop = NaN;
+  private depthBottom = NaN;
 
   constructor(private gen: TerrainGenerator, private world: WorldDef, ctx: CanvasRenderingContext2D) {
     this.chunkSamples = Math.round(CONFIG.terrain.chunkLength / gen.step);
@@ -238,6 +240,24 @@ export class TerrainRenderer {
     const c0 = Math.max(0, Math.floor((minX - gen.originX) / span));
     const c1 = Math.floor((maxX - gen.originX) / span);
     const p = this.world.palette;
+    // One depth gradient for the whole view (per-chunk gradients leave seams),
+    // smoothed so it doesn't pop as hills scroll by.
+    let hi = -Infinity;
+    let lo = Infinity;
+    for (let x = minX; x <= maxX; x += 2) {
+      const y = gen.heightAt(x);
+      if (y > hi) hi = y;
+      if (y < lo) lo = y;
+    }
+    if (!Number.isFinite(this.depthTop)) {
+      this.depthTop = hi;
+      this.depthBottom = lo;
+    }
+    this.depthTop += (hi - this.depthTop) * 0.05;
+    this.depthBottom += (lo - this.depthBottom) * 0.05;
+    const depth = ctx.createLinearGradient(0, this.depthTop - 1, 0, this.depthBottom - 14);
+    depth.addColorStop(0, 'rgba(0,0,0,0)');
+    depth.addColorStop(1, 'rgba(10,6,20,0.45)');
     for (let c = c0; c <= c1; c++) {
       const ch = this.chunk(c);
       if (!ch) continue;
@@ -249,9 +269,6 @@ export class TerrainRenderer {
         ctx.fillStyle = this.pattern;
         ctx.fill(ch.fill);
       }
-      const depth = ctx.createLinearGradient(0, ch.maxY - 2, 0, ch.minY - 14);
-      depth.addColorStop(0, 'rgba(0,0,0,0)');
-      depth.addColorStop(1, 'rgba(10,6,20,0.45)');
       ctx.fillStyle = depth;
       ctx.fill(ch.fill);
       ctx.lineJoin = 'round';

@@ -50,19 +50,22 @@ export class Tutorial {
       return;
     }
     const x = s.player.x;
+    // Only teach air control on a real jump, not a hop over a bump.
+    const pos = v.chassis.getPosition();
+    const bigAir = v.airborne && v.airTime > 0.25 && pos.y - s.gen.surfaceAt(pos.x) > 1.6;
     switch (this.step) {
       case 'gas':
         if (s.input.gas) this.gasHeld += dt;
         if (this.gasHeld > 1.2 && s.distance > 4) this.go('coins');
         break;
       case 'coins': {
-        if (v.airborne && !this.airShown) return this.go('air');
-        if (s.coinCount > 0 && this.timer > 1.2) this.go(this.airShown ? 'brake' : 'airWait');
-        else if (this.timer > 4) this.go('airWait');
+        if (bigAir && !this.airShown && this.timer > 1.5) return this.go('air');
+        if (s.coinCount > 0 && this.timer > 2.5) this.go(this.airShown ? 'brake' : 'airWait');
+        else if (this.timer > 4.5) this.go('airWait');
         break;
       }
       case 'airWait':
-        if (v.airborne) this.go('air');
+        if (bigAir) this.go('air');
         else if (x > 150) this.go('brake');
         break;
       case 'air':
