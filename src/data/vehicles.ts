@@ -41,7 +41,7 @@ export const VEHICLES: VehicleDef[] = [
       brakeTorque: 14,
       airSpin: 3.6,
       airResponse: 3.2,
-      fuelCapacity: 30,
+      fuelCapacity: 26,
       impactTolerance: 11,
       downforce: 0,
     },

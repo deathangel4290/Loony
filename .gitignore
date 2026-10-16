@@ -9,3 +9,5 @@ ios/App/Pods/
 ios/App/App/public/
 ios/DerivedData/
 android/
+e2e/tmp/
+e2e/out/

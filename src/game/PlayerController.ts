@@ -59,7 +59,10 @@ export class PlayerController {
       v.applyControls(dt, { gas: false, brake: false }, false);
       return;
     }
-    v.applyControls(dt, input, this.fuel > 0);
+    const pos = v.chassis.getPosition();
+    const vx = v.chassis.getLinearVelocity().x;
+    const landingAngle = Math.atan(this.gen.slopeAt(pos.x + vx * 0.4));
+    v.applyControls(dt, input, this.fuel > 0, landingAngle);
     // Fuel burns faster on the throttle, slowly at idle.
     const rate = input.gas || input.brake ? 1 : CONFIG.vehicle.fuelIdleFactor;
     if (!this.godMode) this.fuel = Math.max(0, this.fuel - rate * dt);

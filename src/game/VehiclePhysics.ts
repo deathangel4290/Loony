@@ -68,6 +68,8 @@ export class VehiclePhysics {
   /** Current throttle state actually applied (0..1), for audio/visuals. */
   throttle = 0;
   braking = false;
+  private carriedGas = false;
+  private carriedBrake = false;
 
   private postSolve = (contact: Contact, impulse: ContactImpulse) => this.onPostSolve(contact, impulse);
 
@@ -195,7 +197,7 @@ export class VehiclePhysics {
   }
 
   /** Applies controls and helper forces. Call before world.step(). */
-  applyControls(dt: number, input: DriveInput, hasFuel: boolean): void {
+  applyControls(dt: number, input: DriveInput, hasFuel: boolean, landingAngle = 0): void {
     const t = this.tuning;
     const gas = input.gas && hasFuel;
     const reverseWanted = input.brake;
@@ -259,13 +261,26 @@ export class VehiclePhysics {
     }
 
     // Air control: steer towards a target spin rate. Predictable and forgiving.
+    // A pedal still held from before takeoff is treated as "not meant for the
+    // air" and gently levels the car for landing instead; a fresh press in the
+    // air spins at full rate (gas = forward, brake = backward).
+    if (!air) {
+      this.carriedGas = input.gas;
+      this.carriedBrake = input.brake;
+    } else {
+      if (!input.gas) this.carriedGas = false;
+      if (!input.brake) this.carriedBrake = false;
+    }
     if (air) {
       const w = this.chassis.getAngularVelocity();
       const I = this.chassis.getInertia();
+      const angle = this.chassis.getAngle();
+      const levelErr = wrapAngle(angle - landingAngle);
+      const level = clamp(-levelErr * 2.4, -t.airSpin * 0.65, t.airSpin * 0.65);
       let target: number | null = null;
-      if (input.gas) target = -t.airSpin;
-      else if (input.brake) target = t.airSpin;
-      else if (this.def.trait === 'gyro') target = clamp(-pitch * 2.2, -t.airSpin * 0.6, t.airSpin * 0.6);
+      if (input.gas) target = this.carriedGas ? level : -t.airSpin;
+      else if (input.brake) target = this.carriedBrake ? level : t.airSpin;
+      else if (this.def.trait === 'gyro') target = level;
       if (target !== null) {
         const maxTorque = I * t.airSpin * t.airResponse * 1.4;
         this.chassis.applyTorque(clamp(I * (target - w) * t.airResponse, -maxTorque, maxTorque));

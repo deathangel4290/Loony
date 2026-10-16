@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TerrainGenerator } from '../src/game/TerrainGenerator';
 import { WORLDS } from '../src/data/worlds';
+import { CONFIG } from '../src/data/config';
 
 describe('TerrainGenerator', () => {
   it('is deterministic for a seed', () => {
@@ -21,8 +22,9 @@ describe('TerrainGenerator', () => {
         for (const h of g.heights) expect(Number.isFinite(h)).toBe(true);
         // fuel is never missing for too long
         const fuels = g.collectibles.filter((c) => c.kind === 'fuel').map((c) => c.x);
-        expect(fuels[0]).toBeLessThan(260);
-        for (let i = 1; i < fuels.length; i++) expect(fuels[i] - fuels[i - 1]).toBeLessThan(620);
+        expect(fuels[0]).toBeLessThan(CONFIG.fuel.firstCan + 80);
+        const maxGap = CONFIG.fuel.maxSpacing * world.terrain.fuelSpacingMul * 1.1 + 60;
+        for (let i = 1; i < fuels.length; i++) expect(fuels[i] - fuels[i - 1]).toBeLessThan(maxGap);
         expect(fuels[fuels.length - 1]).toBeGreaterThan(5000);
         // coins exist and are above ground
         const coins = g.collectibles.filter((c) => c.kind === 'coin');
