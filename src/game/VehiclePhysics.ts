@@ -68,6 +68,8 @@ export class VehiclePhysics {
   /** Current throttle state actually applied (0..1), for audio/visuals. */
   throttle = 0;
   braking = false;
+  /** Seconds of landing boost remaining. */
+  boostTime = 0;
   private carriedGas = false;
   private carriedBrake = false;
 
@@ -222,7 +224,7 @@ export class VehiclePhysics {
       if (gas) {
         if (driven(rear)) {
           joint.enableMotor(true);
-          joint.setMotorSpeed(-t.topSpeed / radius);
+          joint.setMotorSpeed((-t.topSpeed * (this.boostTime > 0 ? CONFIG.boost.topSpeedMul : 1)) / radius);
           joint.setMaxMotorTorque(t.motorTorque * share * assist * (air ? CONFIG.vehicle.airMotorTorqueFactor : 1));
         } else {
           joint.enableMotor(false);
@@ -287,6 +289,16 @@ export class VehiclePhysics {
       }
     }
 
+    // Landing boost: a short shove along the chassis while grounded.
+    if (this.boostTime > 0) {
+      this.boostTime = Math.max(0, this.boostTime - dt);
+      if (this.grounded && input.gas && hasFuel) {
+        const a = this.chassis.getAngle();
+        const f = this.mass * CONFIG.boost.accel;
+        this.chassis.applyForceToCenter(new Vec2(Math.cos(a) * f, Math.sin(a) * f));
+      }
+    }
+
     // Aero downforce while grounded.
     if (t.downforce > 0 && this.grounded) {
       const v2 = this.chassis.getLinearVelocity().lengthSquared();
@@ -297,7 +309,6 @@ export class VehiclePhysics {
 
     this.applyBumpStops(this.rearJoint, this.rearWheel);
     this.applyBumpStops(this.frontJoint, this.frontWheel);
-    void dt;
   }
 
   /** Progressive bump/droop stops (planck's wheel joint has no limits). */

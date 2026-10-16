@@ -115,6 +115,7 @@ export class GameView {
   private trailTimer = 0;
   private dustTimer = 0;
   private smokeTimer = 0;
+  private boostFx = 0;
   private speedFrac = 0;
   private W = 1;
   private H = 1;
@@ -308,6 +309,14 @@ export class GameView {
       hap.heavy();
       this.texts.spawn(endReasonText[reason], x, y + 2.6, '#ff6b6b', 1.4, '', 0.15, 1.6);
     });
+    ev.on('boost', () => {
+      this.boostFx = CONFIG.boost.duration;
+      if (demo) return;
+      audio.play('whoosh');
+      audio.play('combo', 4);
+      hap.medium();
+      this.camera.zoomPunch(1.2);
+    });
     ev.on('lowFuel', () => {
       if (demo) return;
       audio.play('lowFuel');
@@ -460,6 +469,20 @@ export class GameView {
         if (this.opts.world.terrain.surface === 'grass' && Math.random() < 0.3) {
           this.particles.emit({ kind: PK.Debris, x: p.rx, y: p.ry - r, vx: -vel.x * 0.2, color: '#5fbf45', count: 1, speed: 3, angle: Math.PI * 0.7, spread: 0.8, life: 0.6, size: 0.08, gravity: 12, spin: 10 });
         }
+      }
+    }
+
+    // landing boost: a burst in the equipped boost style
+    if (this.boostFx > 0) {
+      this.boostFx -= dt;
+      if (alive) {
+        const [ex, ey] = this.vehicleR.anchorWorld(p, 'exhaust');
+        const style = look.exhaust;
+        const col = style === 'blue' ? '#5ab8ff' : style === 'bubbles' ? '#bfefff' : '#ff8a1f';
+        this.particles.emit({
+          kind: style === 'bubbles' ? PK.Bubble : PK.Flame, x: ex, y: ey, vx: vel.x * 0.5, vy: vel.y * 0.5, color: col, count: reduced ? 1 : 2,
+          speed: 4, angle: Math.PI + p.a, spread: 0.35, life: 0.25, size: style === 'bubbles' ? 0.14 : 0.32, growth: style === 'bubbles' ? 0.1 : -0.8,
+        });
       }
     }
 
@@ -783,7 +806,7 @@ export class GameView {
   }
 
   private renderSpeedLines(ctx: CanvasRenderingContext2D): void {
-    const f = this.speedFrac;
+    const f = Math.max(this.speedFrac, this.boostFx > 0 ? 0.95 : 0);
     if (f < 0.72 || !this.session.player.alive) return;
     const k = (f - 0.72) / 0.28;
     ctx.strokeStyle = `rgba(255,255,255,${0.12 + k * 0.18})`;

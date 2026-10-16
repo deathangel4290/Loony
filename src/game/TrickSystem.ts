@@ -158,7 +158,7 @@ export class TrickSystem {
     const awards = this.pending!;
     this.pending = null;
     if (this.bothTouched && this.firstTouch <= cfg.perfectWheelWindow && this.landErr < cfg.perfectAngle && this.landAirTime > 0.6 && !v.bodyGrounded) {
-      awards.push({ kind: 'perfect', label: 'PERFECT LANDING', points: 500 });
+      awards.push({ kind: 'perfect', label: 'PERFECT LANDING + BOOST', points: 500 });
       this.perfectLandings++;
     } else if (this.landErr > cfg.closeCallAngle) {
       awards.push({ kind: 'closecall', label: 'CLOSE CALL!', points: 150 });

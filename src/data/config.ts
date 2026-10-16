@@ -65,6 +65,12 @@ export const CONFIG = {
     activeAhead: 130,
     startFlat: 26,
   },
+  boost: {
+    /** Seconds of boost from a perfect landing. */
+    duration: 1.3,
+    accel: 7,
+    topSpeedMul: 1.25,
+  },
   crash: {
     slowMoScale: 0.28,
     slowMoTime: 1.0,

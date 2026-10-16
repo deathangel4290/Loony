@@ -23,6 +23,7 @@ export interface SessionEvents {
   propBreak: { kind: PropKind; x: number; y: number; angle: number; strength: number };
   crash: { reason: EndReason; x: number; y: number };
   lowFuel: void;
+  boost: { x: number; y: number };
   ended: { summary: RunSummary };
 }
 
@@ -78,7 +79,12 @@ export class GameSession {
     this.player = new PlayerController(this.world, opts.vehicle, opts.tuning, this.gen, -12);
     this.tricks = new TrickSystem(
       (e) => {
-        const p = this.player.vehicle.chassis.getPosition();
+        const v = this.player.vehicle;
+        const p = v.chassis.getPosition();
+        if (e.awards.some((a) => a.kind === 'perfect')) {
+          v.boostTime = CONFIG.boost.duration;
+          this.events.emit('boost', { x: p.x, y: p.y });
+        }
         this.events.emit('trick', { ...e, x: p.x, y: p.y });
       },
       (combo) => this.events.emit('comboEnd', { combo }),
