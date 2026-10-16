@@ -223,3 +223,19 @@ describe('Daily challenge', () => {
     expect(cm.completed).toBe(false);
   });
 });
+
+describe('Ghosts', () => {
+  it('records, stores the best per key and plays back with interpolation', async () => {
+    const { GhostRecorder, GhostPlayer, GhostStore } = await import('../src/game/Ghost');
+    const rec = new GhostRecorder(0.1);
+    for (let i = 0; i <= 50; i++) rec.sample(i * 0.05, { x: i * 0.5, y: 1, a: 0, ra: -i, fa: -i });
+    const store = new GhostStore(new MemoryStorage());
+    expect(await store.saveIfBetter({ key: 'd1', vehicleId: 'pip', distance: 25, interval: 0.1, frames: rec.frames })).toBe(true);
+    expect(await store.saveIfBetter({ key: 'd1', vehicleId: 'pip', distance: 10, interval: 0.1, frames: [] })).toBe(false);
+    expect(await store.load('d2')).toBeNull();
+    const p = new GhostPlayer((await store.load('d1'))!);
+    expect(p.at(0.55)).toBe(true);
+    expect(p.pose.x).toBeCloseTo(5.5, 1);
+    expect(p.at(99)).toBe(false);
+  });
+});

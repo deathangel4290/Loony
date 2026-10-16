@@ -5,6 +5,7 @@ import { MENU_MUSIC } from './data/worlds';
 import { GameView } from './game/GameView';
 import { InputManager } from './systems/InputManager';
 import type { RunMode, RunSummary } from './systems/RunSummary';
+import type { GhostData } from './game/Ghost';
 import { getVehicle } from './data/vehicles';
 import { getWorld } from './data/worlds';
 import { applyUpgrades } from './data/upgrades';
@@ -306,7 +307,7 @@ export class App implements AppActions {
     const s = this.services;
     s.audio.unlock();
     this.runMode = mode;
-    void this.ui.transition(() => {
+    void this.ui.transition(async () => {
       this.paused = false;
       this.destroyView();
       const tutorial = mode === 'normal' && !s.save.data.tutorial.completed;
@@ -317,6 +318,7 @@ export class App implements AppActions {
       let seed = randomSeed();
       let best = s.worlds.best(world.id);
       let goal = 0;
+      let ghost: GhostData | null = null;
       if (mode === 'challenge') {
         const c = s.challenge.today;
         vehicle = getVehicle(c.vehicleId);
@@ -327,9 +329,11 @@ export class App implements AppActions {
         seed = c.seed;
         best = s.challenge.best;
         goal = c.target;
+        ghost = await s.ghosts.load(c.dateKey);
       }
       this.view = new GameView({
         services: s, world, vehicle, tuning, look, seed, tutorial, demo: false, ctx: this.ctx, bestDistance: best, goal, mode,
+        ghost, recordGhost: mode === 'challenge',
       });
       this.view.resize(this.W, this.H, this.dpr);
       this.view.onPrompt = (p) => this.hud.setPrompt(p);
@@ -354,6 +358,10 @@ export class App implements AppActions {
     if (!s.save.data.tutorial.completed) {
       s.save.data.tutorial.completed = true;
       s.save.markDirty();
+    }
+    const frames = this.view?.ghostRecording();
+    if (summary.mode === 'challenge' && frames && frames.length > 50) {
+      void s.ghosts.saveIfBetter({ key: s.challenge.today.dateKey, vehicleId: summary.vehicleId, distance: summary.distance, interval: 0.1, frames: frames.slice() });
     }
     const rewards = s.finishRun(summary);
     // Don't keep nudging towards the garage forever if the player skips it.

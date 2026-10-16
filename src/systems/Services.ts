@@ -18,6 +18,7 @@ import { SettingsManager } from './SettingsManager';
 import type { StorageBackend } from './Storage';
 import { VehicleUpgradeSystem } from './VehicleUpgradeSystem';
 import { WorldManager } from './WorldManager';
+import { GhostStore } from '../game/Ghost';
 
 export interface RunRewards {
   summary: RunSummary;
@@ -48,8 +49,11 @@ export class Services {
   readonly audio = new AudioManager();
   readonly haptics = new HapticsManager();
 
+  readonly ghosts: GhostStore;
+
   constructor(storage: StorageBackend) {
     this.save = new SaveManager(storage);
+    this.ghosts = new GhostStore(storage);
     const grant = (r: Reward) => this.grant(r);
     this.settings = new SettingsManager(this.save, this.events);
     this.currency = new CurrencyManager(this.save, this.events);

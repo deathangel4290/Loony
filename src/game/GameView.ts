@@ -19,6 +19,10 @@ import { CameraController } from './CameraController';
 import { GameSession } from './GameSession';
 import type { PropKind } from '../data/types';
 import { Tutorial, type TutorialPrompt } from './Tutorial';
+import { GhostPlayer, GhostRecorder, type GhostData } from './Ghost';
+import { getVehicle } from '../data/vehicles';
+import { DEFAULT_LOADOUT } from '../data/cosmetics';
+import { resolveLook } from '../render/VehicleRenderer';
 
 export interface GameViewOptions {
   services: Services;
@@ -35,6 +39,9 @@ export interface GameViewOptions {
   /** Daily challenge target distance (0 = none). */
   goal?: number;
   mode?: RunMode;
+  /** Best attempt to race against, and whether to record this run. */
+  ghost?: GhostData | null;
+  recordGhost?: boolean;
 }
 
 export interface HudState {
@@ -84,6 +91,10 @@ export class GameView {
   private coinSprites: Sprite[];
   private fuelSprite: Sprite;
   tutorial: Tutorial | null = null;
+  private ghost: GhostPlayer | null = null;
+  private ghostRenderer: VehicleRenderer | null = null;
+  private ghostVisible = false;
+  private recorder: GhostRecorder | null = null;
   onPrompt: ((p: TutorialPrompt | null) => void) | null = null;
   onEnded: ((s: RunSummary) => void) | null = null;
   onHudPulse: ((what: 'coin' | 'fuel' | 'score') => void) | null = null;
@@ -140,6 +151,12 @@ export class GameView {
     if (opts.tutorial && !opts.demo) {
       this.tutorial = new Tutorial(this.session, (p) => this.onPrompt?.(p));
     }
+    if (opts.ghost && opts.ghost.frames.length > 10) {
+      this.ghost = new GhostPlayer(opts.ghost);
+      const gv = getVehicle(opts.ghost.vehicleId);
+      this.ghostRenderer = new VehicleRenderer(gv, gv.physics, { ...resolveLook(gv, DEFAULT_LOADOUT), paint: '#c9d6ff', decal: 'none', accessory: 'none' }, 70);
+    }
+    if (opts.recordGhost) this.recorder = new GhostRecorder();
     this.bindEvents();
     if (!opts.demo) {
       s.audio.engine.start(opts.vehicle.engine);
@@ -354,6 +371,8 @@ export class GameView {
     }
     const alpha = s.update(dt);
     this.updatePose(alpha);
+    if (this.recorder && s.player.alive) this.recorder.sample(s.time, { x: this.pose.x, y: this.pose.y, a: this.pose.a, ra: this.pose.ra, fa: this.pose.fa });
+    if (this.ghost) this.ghostVisible = this.ghost.at(s.time) || this.ghostVisible;
 
     const vel = v.chassis.getLinearVelocity();
     const speed = vel.length();
@@ -536,6 +555,7 @@ export class GameView {
     this.renderDecor(ctx, minX, maxX, 1);
     this.renderCollectibles(ctx, minX, maxX);
     this.renderProps(ctx, minX, maxX);
+    this.renderGhost(ctx);
     this.vehicleR.render(ctx, this.pose, this.time, s.player.vehicle.speed);
     this.particles.render(ctx, minX, maxX);
     if (this.physicsDebug) this.renderPhysicsDebug(ctx);
@@ -558,6 +578,36 @@ export class GameView {
       ctx.fillStyle = `rgba(255,255,255,${this.flash * 0.55})`;
       ctx.fillRect(0, 0, W, H);
     }
+  }
+
+  /** Translucent replay of the best attempt on this course. */
+  private renderGhost(ctx: CanvasRenderingContext2D): void {
+    if (!this.ghost || !this.ghostRenderer || !this.ghostVisible) return;
+    const g = this.ghost.pose;
+    const t = this.ghostRenderer.tuning;
+    const c = Math.cos(g.a);
+    const sn = Math.sin(g.a);
+    const w = (lx: number, ly: number): [number, number] => [g.x + lx * c - ly * sn, g.y + lx * sn + ly * c];
+    const [rx, ry] = w(t.rearWheel.x, t.rearWheel.y + 0.06);
+    const [fx, fy] = w(t.frontWheel.x, t.frontWheel.y + 0.06);
+    ctx.save();
+    ctx.globalAlpha = 0.42;
+    this.ghostRenderer.render(ctx, { x: g.x, y: g.y, a: g.a, rx, ry, ra: g.ra, fx, fy, fa: g.fa }, this.time, 0);
+    ctx.restore();
+    ctx.save();
+    ctx.translate(g.x, g.y + 1.9);
+    ctx.scale(1, -1);
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = '#e2e8ff';
+    ctx.font = '0.42px Lilita One, Fredoka, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('YOUR BEST', 0, 0);
+    ctx.restore();
+  }
+
+  /** The recorded run, for saving as the next ghost. */
+  ghostRecording(): number[] | null {
+    return this.recorder ? this.recorder.frames : null;
   }
 
   private renderDecor(ctx: CanvasRenderingContext2D, minX: number, maxX: number, layer: 0 | 1): void {
