@@ -51,6 +51,7 @@ export class Weather {
       case 'dust': vx = -0.06; vy = 0.005; break;
       case 'paper': vx = -0.05; vy = 0.025; break;
       case 'pollen': vx = -0.015; vy = -0.008; break;
+      case 'stardust': vx = -0.004; vy = -0.003; break;
     }
     for (let i = 0; i < this.n; i++) {
       const z = this.z[i];
@@ -73,6 +74,7 @@ export class Weather {
       case 'snow': color = '#ffffff'; break;
       case 'paper': color = '#e8ecff'; break;
       case 'embers': color = '#ffb347'; break;
+      case 'stardust': color = '#a9d8ff'; break;
     }
     ctx.fillStyle = color;
     for (let i = 0; i < this.n; i++) {

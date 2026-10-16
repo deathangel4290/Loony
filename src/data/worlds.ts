@@ -127,6 +127,30 @@ export const WORLDS: WorldDef[] = [
     coinMultiplier: 2.2,
     music: { bpm: 136, root: 52, scale: HARMONIC_MINOR, progression: [0, 5, 6, 4], lead: 'sawtooth', bass: 'square', swing: 0.0, drums: 'four' },
   },
+  {
+    id: 'moon',
+    name: 'Lunar Base',
+    tagline: 'Low gravity, huge air, silly flips',
+    price: 80000,
+    requiredLevel: 16,
+    palette: {
+      skyTop: '#04050f', skyBottom: '#1a1f3d', sun: '#7ec8ff', far: '#3b3f55', mid: '#4d5168', near: '#5d6178',
+      surface: '#d9dbe3', surfaceEdge: '#a7abb9', topsoil: '#9ea2b1', dirt: '#878b9b', dirtDark: '#6a6e7e', speck: '#b3b6c3',
+      accent: '#7ec8ff', fog: '#20253f',
+    },
+    terrain: {
+      surface: 'moon', baseDifficulty: 0.35, groundFriction: 0.95, iceChance: 0, fuelSpacingMul: 1.3,
+      pieceWeights: { rolling: 0.9, hill: 1.4, valley: 1.3, climb: 0.9, descent: 1.0, kicker: 2.0, gap: 1.0, bumps: 0.7, plateau: 0.6, doubleHill: 1.4 },
+    },
+    decor: ['moonrock', 'dish', 'moonrock', 'lander', 'moonflag'],
+    props: ['crate', 'barrel', 'boulder'],
+    particle: 'stardust',
+    sky: 'space',
+    time: 'night',
+    coinMultiplier: 2.6,
+    gravityScale: 0.42,
+    music: { bpm: 84, root: 50, scale: LYDIAN, progression: [0, 2, 4, 3], lead: 'sine', bass: 'triangle', swing: 0.0, drums: 'soft' },
+  },
 ];
 
 export const WORLD_BY_ID: Record<string, WorldDef> = Object.fromEntries(WORLDS.map((w) => [w.id, w]));

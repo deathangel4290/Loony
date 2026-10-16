@@ -370,6 +370,101 @@ const drawDecor = (ctx: Ctx, kind: DecorKind, w: WorldDef, v: number): [number, 
       ctx.fill();
       return;
     }
+    case 'moonrock': {
+      ctx.fillStyle = '#9a9eae';
+      ctx.beginPath();
+      ctx.moveTo(-0.8, -0.15);
+      ctx.quadraticCurveTo(-0.7, 0.55 + v * 0.1, -0.1, 0.6 + v * 0.12);
+      ctx.quadraticCurveTo(0.6, 0.55, 0.8, -0.15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#7d8192';
+      for (const [x, y, r] of [[-0.35, 0.25, 0.12], [0.2, 0.35, 0.09], [0.4, 0.1, 0.07]] as const) {
+        ctx.beginPath();
+        ctx.ellipse(x, y, r, r * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.beginPath();
+      ctx.ellipse(-0.3, 0.45, 0.25, 0.08, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      return;
+    }
+    case 'dish': {
+      ctx.strokeStyle = '#5d6178';
+      ctx.lineWidth = 0.08;
+      ctx.beginPath();
+      ctx.moveTo(-0.5, -0.2);
+      ctx.lineTo(0, 1.2);
+      ctx.lineTo(0.5, -0.2);
+      ctx.moveTo(0, -0.2);
+      ctx.lineTo(0, 1.2);
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(0, 1.4);
+      ctx.rotate(0.5);
+      ctx.fillStyle = '#e6e9f2';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 0.9, 0.32, 0, Math.PI, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#a7abb9';
+      ctx.lineWidth = 0.04;
+      ctx.stroke();
+      ctx.strokeStyle = '#5d6178';
+      ctx.lineWidth = 0.04;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, 0.6);
+      ctx.stroke();
+      ctx.fillStyle = '#ff3d6e';
+      ctx.beginPath();
+      ctx.arc(0, 0.62, 0.06, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
+    case 'lander': {
+      ctx.strokeStyle = '#8b8fa3';
+      ctx.lineWidth = 0.07;
+      ctx.beginPath();
+      ctx.moveTo(-0.5, 0.6);
+      ctx.lineTo(-0.95, -0.2);
+      ctx.moveTo(0.5, 0.6);
+      ctx.lineTo(0.95, -0.2);
+      ctx.stroke();
+      ctx.fillStyle = '#e8b931';
+      ctx.fillRect(-0.6, 0.45, 1.2, 0.55);
+      ctx.fillStyle = '#c99a1f';
+      for (let i = 0; i < 4; i++) ctx.fillRect(-0.55 + i * 0.3, 0.5, 0.12, 0.45);
+      ctx.fillStyle = '#d4d8e2';
+      ctx.beginPath();
+      ctx.moveTo(-0.45, 1.0);
+      ctx.lineTo(-0.35, 1.55);
+      ctx.lineTo(0.4, 1.55);
+      ctx.lineTo(0.5, 1.0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#1c2541';
+      ctx.fillRect(-0.12, 1.2, 0.24, 0.18);
+      ctx.fillStyle = '#5d6178';
+      ctx.fillRect(-1.05, -0.24, 0.25, 0.06);
+      ctx.fillRect(0.8, -0.24, 0.25, 0.06);
+      return;
+    }
+    case 'moonflag': {
+      ctx.fillStyle = '#d4d8e2';
+      ctx.fillRect(-0.04, -0.2, 0.08, 2.0);
+      ctx.fillStyle = '#ff3d6e';
+      ctx.fillRect(0.04, 1.25, 0.95, 0.55);
+      ctx.fillStyle = '#ffd23f';
+      ctx.beginPath();
+      ctx.arc(0.5, 1.52, 0.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0.04, 1.25, 0.95, 0.07);
+      return;
+    }
     case 'crystal': {
       const c = v % 2 ? '#ff6b1a' : '#ff3d6e';
       for (const [x, h, a] of [[-0.2, 0.9, -0.25], [0.15, 1.3, 0.1], [0.4, 0.7, 0.4]] as const) {
@@ -414,6 +509,10 @@ const DECOR_BOUNDS: Partial<Record<DecorKind, [number, number, number, number]>>
   deadtree: [-0.9, -0.25, 1.0, 2.8],
   vent: [-0.85, -0.25, 0.85, 1.0],
   crystal: [-0.6, -0.15, 0.8, 1.4],
+  moonrock: [-0.85, -0.2, 0.85, 0.85],
+  dish: [-1.0, -0.25, 1.1, 2.3],
+  lander: [-1.1, -0.3, 1.1, 1.65],
+  moonflag: [-0.1, -0.25, 1.05, 1.9],
 };
 
 export const DECOR_VARIANTS = 3;

@@ -4,7 +4,7 @@ import { mkdirSync } from 'node:fs';
 const base = process.argv[2] ?? 'http://localhost:4173/';
 const out = new URL('./out/', import.meta.url).pathname;
 mkdirSync(out, { recursive: true });
-const pairs = [['hills', 'scrambler'], ['desert', 'thunder'], ['snow', 'comet'], ['city', 'vortex'], ['volcano', 'brutus'], ['hills', 'nova']];
+const pairs = (process.env.PAIRS ?? 'hills:scrambler,desert:thunder,snow:comet,city:vortex,volcano:brutus,hills:nova').split(',').map((p) => p.split(':'));
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM ?? undefined });
 const ctx = await browser.newContext({ viewport: { width: 852, height: 393 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 const page = await ctx.newPage();

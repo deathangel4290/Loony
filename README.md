@@ -1,6 +1,6 @@
 # Loony Wheels
 
-A 2D physics hill-driving game for iOS. Drive as far as you can across five worlds, flip for coins, manage fuel, upgrade seven very different vehicles and chase your best distance.
+A 2D physics hill-driving game for iOS. Drive as far as you can across six worlds (including a low-gravity moon), flip for coins, manage fuel, upgrade seven very different vehicles and chase your best distance.
 
 Everything is original: the vehicles, terrain, sprites, music and sound are all generated in code, so there are no third-party art or audio assets.
 
@@ -103,7 +103,7 @@ ios/                     Capacitor iOS project
 All content lives in `src/data`, so adding any of the following needs no engine changes:
 
 - **Vehicle**: append to `VEHICLES` with physics, trait, style and engine sound. For a new silhouette, add a style to `render/VehicleArt.ts`.
-- **World**: append to `WORLDS` with a palette, terrain piece weights, decor, props, particles and music.
+- **World**: append to `WORLDS` with a palette, terrain piece weights, decor, props, particles, music and an optional `gravityScale`.
 - **Terrain piece**: add an id to `TerrainPieceId`, a `case` in `TerrainGenerator.build()`, and a weight in the worlds that should use it.
 - **Mission, trophy or cosmetic**: add an entry to the relevant data file.
 - **Feel tuning**: change `data/config.ts` (physics step, camera, tricks, scoring, fuel spacing, crash slow-mo).

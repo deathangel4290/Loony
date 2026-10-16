@@ -213,10 +213,10 @@ export class GameView {
       let i = 0;
       for (const a of e.awards) {
         const sub = a.points > 0 ? `+${formatNumber(a.points * e.multiplier)}` : '';
-        this.texts.spawn(a.label, fx, 0.27 + i * 0.105, colors[a.kind] ?? '#fff', a.kind === 'multi' ? 0.8 : 1.15, sub, i * 0.2, 1.7, true);
+        this.texts.spawn(a.label, fx, 0.32 + i * 0.105, colors[a.kind] ?? '#fff', a.kind === 'multi' ? 0.8 : 1.15, sub, i * 0.2, 1.7, true);
         i++;
       }
-      if (e.multiplier > 1) this.texts.spawn(`COMBO x${e.multiplier}`, fx, 0.27 + i * 0.105, '#ffd84d', 0.9, '', i * 0.2, 1.5, true);
+      if (e.multiplier > 1) this.texts.spawn(`COMBO x${e.multiplier}`, fx, 0.32 + i * 0.105, '#ffd84d', 0.9, '', i * 0.2, 1.5, true);
       this.particles.emit({ kind: PK.Confetti, x: e.x, y: e.y + 1, color: '#ffd84d', count: 10, speed: 5, life: 1.0, size: 0.16, gravity: 6, spin: 8 });
       this.particles.emit({ kind: PK.Confetti, x: e.x, y: e.y + 1, color: '#7dd3ff', count: 8, speed: 5, life: 1.0, size: 0.16, gravity: 6, spin: 8 });
       if (demo) return;
@@ -332,6 +332,7 @@ export class GameView {
       case 'snow': return '#ffffff';
       case 'road': return '#a5a9bb';
       case 'rock': return '#5b4f55';
+      case 'moon': return '#c9ccd6';
     }
   }
 

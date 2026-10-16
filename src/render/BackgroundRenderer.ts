@@ -70,7 +70,8 @@ export class BackgroundRenderer {
     sc.fillRect(0, 0, w, h);
     const night = this.time === 'night';
     if (night || this.world.sky === 'smoke') {
-      for (let i = 0; i < 140; i++) {
+      const stars = this.world.sky === 'space' ? 320 : 140;
+      for (let i = 0; i < stars; i++) {
         sc.globalAlpha = 0.3 + rng.next() * 0.7;
         sc.fillStyle = '#ffffff';
         const r = rng.next() < 0.9 ? 1 : 2;
@@ -90,7 +91,31 @@ export class BackgroundRenderer {
     sc.arc(sunX, sunY, sunR, 0, Math.PI * 2);
     sc.fillStyle = p.sun;
     sc.fill();
-    if (night) {
+    if (this.world.sky === 'space') {
+      // Earth, with continents and a soft terminator.
+      const r = sunR * 1.25;
+      sc.save();
+      sc.beginPath();
+      sc.arc(sunX, sunY, r, 0, Math.PI * 2);
+      sc.fillStyle = '#2f7de1';
+      sc.fill();
+      sc.clip();
+      sc.fillStyle = '#4caf50';
+      for (const [dx, dy, rx, ry] of [[-0.35, -0.2, 0.42, 0.28], [0.3, 0.25, 0.35, 0.22], [0.1, -0.55, 0.25, 0.12]] as const) {
+        sc.beginPath();
+        sc.ellipse(sunX + dx * r, sunY + dy * r, rx * r, ry * r, 0.4, 0, Math.PI * 2);
+        sc.fill();
+      }
+      sc.fillStyle = 'rgba(255,255,255,0.75)';
+      sc.beginPath();
+      sc.ellipse(sunX - 0.1 * r, sunY + 0.6 * r, 0.5 * r, 0.1 * r, 0.2, 0, Math.PI * 2);
+      sc.fill();
+      sc.fillStyle = 'rgba(4,5,15,0.55)';
+      sc.beginPath();
+      sc.arc(sunX + r * 0.55, sunY + r * 0.15, r * 1.05, 0, Math.PI * 2);
+      sc.fill();
+      sc.restore();
+    } else if (night) {
       sc.beginPath();
       sc.arc(sunX + sunR * 0.4, sunY - sunR * 0.2, sunR * 0.85, 0, Math.PI * 2);
       sc.fillStyle = rgba(p.skyTop, 0.55);

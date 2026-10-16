@@ -71,7 +71,7 @@ export class GameSession {
   viewRight = 40;
 
   constructor(readonly opts: SessionOptions) {
-    this.world = new World({ gravity: new Vec2(0, -CONFIG.physics.gravity) });
+    this.world = new World({ gravity: new Vec2(0, -CONFIG.physics.gravity * (opts.world.gravityScale ?? 1)) });
     this.gen = new TerrainGenerator(opts.world, opts.seed, { tutorial: opts.tutorial });
     this.terrain = new TerrainManager(this.world, this.gen);
     this.terrain.update(-40, 60, Infinity);

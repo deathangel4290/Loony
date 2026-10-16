@@ -668,7 +668,7 @@ export class TerrainGenerator {
     const ang = Math.atan(lip.slope);
     const vx = v * Math.cos(ang);
     const vy = v * Math.sin(ang);
-    const g = CONFIG.physics.gravity;
+    const g = CONFIG.physics.gravity * (this.world.gravityScale ?? 1);
     let placed = 0;
     for (let t = 0.12; t < 2.5 && placed < 12; t += 0.11) {
       const x = lip.x + vx * t;

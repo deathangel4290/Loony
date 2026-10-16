@@ -83,17 +83,18 @@ export interface UpgradeDef {
   perLevelLabel: string;
 }
 
-export type SurfaceKind = 'grass' | 'sand' | 'snow' | 'road' | 'rock';
-export type WorldParticle = 'pollen' | 'dust' | 'snow' | 'paper' | 'embers';
+export type SurfaceKind = 'grass' | 'sand' | 'snow' | 'road' | 'rock' | 'moon';
+export type WorldParticle = 'pollen' | 'dust' | 'snow' | 'paper' | 'embers' | 'stardust';
 export type DecorKind =
   | 'tree' | 'bush' | 'rock' | 'flower' | 'fence'
   | 'cactus' | 'mesa' | 'skull' | 'tumble'
   | 'pine' | 'snowrock' | 'snowman'
   | 'lamp' | 'sign' | 'hydrant' | 'bin'
-  | 'deadtree' | 'vent' | 'crystal';
+  | 'deadtree' | 'vent' | 'crystal'
+  | 'moonrock' | 'dish' | 'lander' | 'moonflag';
 export type PropKind = 'crate' | 'barrel' | 'cone' | 'snowman' | 'boulder' | 'hay' | 'tire';
 export type TimeOfDay = 'day' | 'sunset' | 'night';
-export type SkyFeature = 'clouds' | 'sunset' | 'aurora' | 'skyline' | 'smoke';
+export type SkyFeature = 'clouds' | 'sunset' | 'aurora' | 'skyline' | 'smoke' | 'space';
 
 export interface WorldPalette {
   skyTop: string;
@@ -155,6 +156,8 @@ export interface WorldDef {
   sky: SkyFeature;
   time: TimeOfDay;
   coinMultiplier: number;
+  /** Multiplier on gravity (1 = Earth-like). */
+  gravityScale?: number;
   music: MusicDef;
 }
 

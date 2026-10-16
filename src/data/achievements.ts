@@ -1,4 +1,6 @@
 import type { AchievementDef } from './types';
+import { WORLDS } from './worlds';
+import { VEHICLES } from './vehicles';
 
 export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'first_run', name: 'First Run', description: 'Finish your first run.', icon: 'flag', stat: 'runs', goal: 1, reward: { coins: 100 } },
@@ -22,7 +24,8 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'millionaire', name: 'Millionaire', description: 'Earn 1,000,000 coins in total.', icon: 'coin', stat: 'coinsEarned', goal: 1000000, reward: { gems: 50, cosmetic: 'acc_crown' } },
   { id: 'upgrades_20', name: 'Grease Monkey', description: 'Buy 20 upgrades.', icon: 'wrench', stat: 'upgradesBought', goal: 20, reward: { coins: 1500, tokens: 1 } },
   { id: 'garage_3', name: 'Collector', description: 'Own 3 vehicles.', icon: 'car', stat: 'vehiclesOwned', goal: 3, reward: { coins: 2000, gems: 5 } },
-  { id: 'garage_all', name: 'Full Garage', description: 'Unlock every vehicle.', icon: 'car', stat: 'vehiclesOwned', goal: 7, reward: { gems: 40 } },
-  { id: 'worlds_all', name: 'Globetrotter', description: 'Drive in every world.', icon: 'globe', stat: 'worldsVisited', goal: 5, reward: { coins: 5000, gems: 10 } },
+  { id: 'garage_all', name: 'Full Garage', description: 'Unlock every vehicle.', icon: 'car', stat: 'vehiclesOwned', goal: VEHICLES.length, reward: { gems: 40 } },
+  { id: 'worlds_all', name: 'Globetrotter', description: 'Drive in every world.', icon: 'globe', stat: 'worldsVisited', goal: WORLDS.length, reward: { coins: 5000, gems: 10 } },
+  { id: 'moonwalk', name: 'Moonwalker', description: 'Stay airborne for 8 seconds.', icon: 'air', stat: 'longestAirtime', goal: 8, reward: { coins: 6000, gems: 15 } },
   { id: 'altitude_100', name: 'Summit', description: 'Climb 100 m above the start.', icon: 'mountain', stat: 'maxAltitude', goal: 100, reward: { coins: 2500 } },
 ];

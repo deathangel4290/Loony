@@ -342,6 +342,17 @@ export class TerrainRenderer {
           ctx.stroke(ch.surface);
           ctx.restore();
           break;
+        case 'moon':
+          ctx.strokeStyle = p.surface;
+          ctx.lineWidth = 0.3;
+          ctx.stroke(ch.surface);
+          ctx.save();
+          ctx.translate(0, 0.1);
+          ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+          ctx.lineWidth = 0.05;
+          ctx.stroke(ch.surface);
+          ctx.restore();
+          break;
         case 'rock':
           ctx.strokeStyle = p.surface;
           ctx.lineWidth = 0.3;
