@@ -1,0 +1,28 @@
+import type { AchievementDef } from './types';
+
+export const ACHIEVEMENTS: AchievementDef[] = [
+  { id: 'first_run', name: 'First Run', description: 'Finish your first run.', icon: 'flag', stat: 'runs', goal: 1, reward: { coins: 100 } },
+  { id: 'runs_25', name: 'Regular', description: 'Finish 25 runs.', icon: 'flag', stat: 'runs', goal: 25, reward: { coins: 1000, gems: 5 } },
+  { id: 'runs_100', name: 'Road Warrior', description: 'Finish 100 runs.', icon: 'flag', stat: 'runs', goal: 100, reward: { coins: 5000, gems: 15 } },
+  { id: 'dist_1k', name: '1,000 Meters', description: 'Reach 1,000 m in a single run.', icon: 'distance', stat: 'bestDistance', goal: 1000, reward: { coins: 500 } },
+  { id: 'dist_3k', name: 'Long Haul', description: 'Reach 3,000 m in a single run.', icon: 'distance', stat: 'bestDistance', goal: 3000, reward: { coins: 2000, gems: 5 } },
+  { id: 'dist_10k', name: '10,000 Meters', description: 'Reach 10,000 m in a single run.', icon: 'distance', stat: 'bestDistance', goal: 10000, reward: { coins: 10000, gems: 25 } },
+  { id: 'total_100k', name: 'Odometer', description: 'Drive 100 km in total.', icon: 'distance', stat: 'totalDistance', goal: 100000, reward: { coins: 8000, gems: 15 } },
+  { id: 'first_backflip', name: 'First Backflip', description: 'Land a backflip.', icon: 'flip', stat: 'backflips', goal: 1, reward: { coins: 150 } },
+  { id: 'backflips_10', name: 'Flip Fanatic', description: 'Land 10 backflips.', icon: 'flip', stat: 'backflips', goal: 10, reward: { coins: 600 } },
+  { id: 'frontflips_10', name: 'Nose Diver', description: 'Land 10 frontflips.', icon: 'flip', stat: 'frontflips', goal: 10, reward: { coins: 800 } },
+  { id: 'flips_100', name: 'Gravity Optional', description: 'Land 100 flips.', icon: 'flip', stat: 'flips', goal: 100, reward: { coins: 4000, gems: 10 } },
+  { id: 'perfect_1', name: 'Perfect Landing', description: 'Nail a perfect landing.', icon: 'star', stat: 'perfectLandings', goal: 1, reward: { coins: 150 } },
+  { id: 'perfect_50', name: 'Feather Touch', description: 'Nail 50 perfect landings.', icon: 'star', stat: 'perfectLandings', goal: 50, reward: { coins: 3000, gems: 10 } },
+  { id: 'wheelie_5', name: 'Long Wheelie', description: 'Hold a 5-second wheelie.', icon: 'wheelie', stat: 'longestWheelie', goal: 5, reward: { coins: 700 } },
+  { id: 'air_4', name: 'Frequent Flyer', description: 'Stay airborne for 4 seconds.', icon: 'air', stat: 'longestAirtime', goal: 4, reward: { coins: 900 } },
+  { id: 'nocrash', name: 'No Crash Run', description: 'Run out of fuel without crashing.', icon: 'shield', stat: 'noCrashRuns', goal: 1, reward: { coins: 300 } },
+  { id: 'combo_5', name: 'Combo King', description: 'Reach a x5 trick combo.', icon: 'combo', stat: 'bestCombo', goal: 5, reward: { coins: 1500, gems: 5 } },
+  { id: 'coins_10k', name: 'Pocket Change', description: 'Collect 10,000 coins.', icon: 'coin', stat: 'coinsCollected', goal: 10000, reward: { coins: 1000 } },
+  { id: 'millionaire', name: 'Millionaire', description: 'Earn 1,000,000 coins in total.', icon: 'coin', stat: 'coinsEarned', goal: 1000000, reward: { gems: 50, cosmetic: 'acc_crown' } },
+  { id: 'upgrades_20', name: 'Grease Monkey', description: 'Buy 20 upgrades.', icon: 'wrench', stat: 'upgradesBought', goal: 20, reward: { coins: 1500, tokens: 1 } },
+  { id: 'garage_3', name: 'Collector', description: 'Own 3 vehicles.', icon: 'car', stat: 'vehiclesOwned', goal: 3, reward: { coins: 2000, gems: 5 } },
+  { id: 'garage_all', name: 'Full Garage', description: 'Unlock every vehicle.', icon: 'car', stat: 'vehiclesOwned', goal: 7, reward: { gems: 40 } },
+  { id: 'worlds_all', name: 'Globetrotter', description: 'Drive in every world.', icon: 'globe', stat: 'worldsVisited', goal: 5, reward: { coins: 5000, gems: 10 } },
+  { id: 'altitude_100', name: 'Summit', description: 'Climb 100 m above the start.', icon: 'mountain', stat: 'maxAltitude', goal: 100, reward: { coins: 2500 } },
+];

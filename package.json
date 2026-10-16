@@ -1,0 +1,49 @@
+{
+  "name": "loony-wheels",
+  "version": "1.0.0",
+  "description": "Loony Wheels — a 2D physics hill-driving game for iOS (Capacitor)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:debug": "tsc && vite build --mode debug",
+    "preview": "vite preview",
+    "typecheck": "tsc",
+    "test": "vitest run",
+    "test:e2e": "node e2e/smoke.mjs",
+    "ios:sync": "npm run build && npx cap sync ios",
+    "ios:open": "npx cap open ios"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deathangel4290/Loony.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/deathangel4290/Loony/issues"
+  },
+  "homepage": "https://github.com/deathangel4290/Loony#readme",
+  "dependencies": {
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
+    "@fontsource/fredoka": "^5.3.0",
+    "@fontsource/lilita-one": "^5.3.0",
+    "planck": "^1.5.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
+    "@playwright/test": "^1.56.1",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  },
+  "private": true,
+  "type": "module"
+}

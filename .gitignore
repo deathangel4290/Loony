@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+test-results/
+playwright-report/
+*.log
+.DS_Store
+ios/App/Pods/
+ios/App/App/public/
+ios/DerivedData/
+android/
